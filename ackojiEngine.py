@@ -7,10 +7,7 @@ app = Flask(__name__)
 
 @app.route("/ackoji_engine", methods=['GET'])
 def ackoji_engine():
-    # req = request.get_json()
     msg = request.args.get('msg')
-    #msg = req['msg']
-    print("\nLOG:", msg, "\n")
     return ackoji_engine_helper(msg)
 
 
@@ -39,11 +36,9 @@ def analyze_sentiment(mail_text):
 # returns flag phrases from configurable file
 def get_flag_phrases(filename):
     with open(filename) as f:
-        lines = f.readlines()
-    flag_phrases = []
-    for line in lines:
-        flag_phrases.append(line)
-    return flag_phrases
+        lines = f.read()
+    lines = lines.splitlines();
+    return lines
 
 # Logic
 def ackoji_engine_helper(mail_text):
@@ -51,18 +46,18 @@ def ackoji_engine_helper(mail_text):
     mail_text = mail_text.lower()
     flag_phrases = get_flag_phrases('flag_phrases.txt')
     questionable = False
-
+    
     # check the flag phrases
     for phrase in flag_phrases:
         if phrase in mail_text:
             questionable = True
+    
 
     # check sentiment
     compound = analyze_sentiment(mail_text)
-    #print(str(compound))
     if (compound < CRITICAL_COMPOUND):
         questionable = True
-
+    
     # check sentence count
     num_sentences = sentenceCount(mail_text)
     if num_sentences > 3:
@@ -75,6 +70,4 @@ def ackoji_engine_helper(mail_text):
         return "Acknowledgement"
 
 if __name__ == '__main__':
-    print("!!!RUNNING1!!!")
-    # print(ackoji_engine_helper("I will be there."))
     app.run(host='0.0.0.0', port=105)
